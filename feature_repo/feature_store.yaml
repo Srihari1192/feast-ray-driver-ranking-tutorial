@@ -2,29 +2,37 @@ project: driver_ranking
 registry: data/registry.db
 provider: local
 
-# Ray offline store configuration for data I/O operations
+# ---------------------------------------------------------
+# Ray Offline Store Configuration (Python SDK reads this)
+# ---------------------------------------------------------
 offline_store:
   type: ray
-  storage_path: data/ray_storage              # Optional: Path for storing datasets
-  # Conservative settings for local development and testing
-  broadcast_join_threshold_mb: 25             # Broadcast join threshold (MB)
-  max_parallelism_multiplier: 1               # Parallelism as multiple of CPU cores
-  target_partition_size_mb: 16                # Target partition size (MB)
-  enable_ray_logging: false                   # Disable Ray logging for cleaner output
-  # ray_address: "127.0.0.1:10001"            # Ray address
+  storage_path: data/ray_storage
 
-# Ray compute engine configuration for distributed feature processing
+  broadcast_join_threshold_mb: 25
+  max_parallelism_multiplier: 1
+  target_partition_size_mb: 16
+  enable_ray_logging: false
+
+
+# ---------------------------------------------------------
+# Ray Compute Engine for materialization
+# ---------------------------------------------------------
 batch_engine:
   type: ray.engine
-  max_workers: 2                              # Maximum number of Ray workers (conservative for local)
-  enable_optimization: true                   # Enable performance optimizations
-  broadcast_join_threshold_mb: 50             # Broadcast join threshold (MB)
-  target_partition_size_mb: 32                # Target partition size (MB)
-  window_size_for_joins: "1H"                 # Time window for distributed joins
-  # ray_address: "127.0.0.1:10001"            # Ray address
+  max_workers: 2
+  enable_optimization: true
+  broadcast_join_threshold_mb: 50
+  target_partition_size_mb: 32
+  window_size_for_joins: "1H"
 
-# Online store for serving features
+
+# ---------------------------------------------------------
+# Online Store: Redis (must match Feast Operator)
+# ---------------------------------------------------------
 online_store:
-  path: data/online_store.db
+  type: redis
+  redis_type: redis
+  connection_string: "redis://redis.test-feast-ray.svc.cluster.local:6379"
 
 entity_key_serialization_version: 3
